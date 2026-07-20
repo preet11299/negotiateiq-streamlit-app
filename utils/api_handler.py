@@ -4,7 +4,7 @@ import time
 TIMEOUT_SECONDS = 30
 RETRY_DELAY = 15
 
-PROVIDERS = ["Google Gemini", "Groq", "OpenAI"]
+PROVIDERS = ["Google Gemini", "Groq", "OpenAI", "Anthropic"]
 DEFAULT_PROVIDER = "Google Gemini"
 
 MODEL_REGISTRIES = {
@@ -22,6 +22,11 @@ MODEL_REGISTRIES = {
         "gpt-4o": "GPT-4o",
         "gpt-4o-mini": "GPT-4o Mini",
         "gpt-3.5-turbo": "GPT-3.5 Turbo",
+    },
+    "Anthropic": {
+        "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet",
+        "claude-3-5-haiku-20241022": "Claude 3.5 Haiku",
+        "claude-3-opus-20240229": "Claude 3 Opus",
     }
 }
 
@@ -84,6 +89,23 @@ def call_llm(prompt: str, api_key: str, provider: str = "Google Gemini", model_n
             content = response.choices[0].message.content
             if not content:
                 raise APIError("Empty response from OpenAI API")
+            return content
+            
+        elif provider == "Anthropic":
+            from anthropic import Anthropic
+            client = Anthropic(api_key=api_key, timeout=TIMEOUT_SECONDS)
+            
+            if json_mode:
+                prompt += "\n\nRespond ONLY with a valid JSON object. Do not include markdown formatting or introductory text."
+                
+            response = client.messages.create(
+                model=model_name,
+                max_tokens=4096,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            content = response.content[0].text
+            if not content:
+                raise APIError("Empty response from Anthropic API")
             return content
             
         else:

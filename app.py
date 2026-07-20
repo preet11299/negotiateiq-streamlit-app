@@ -226,6 +226,8 @@ with st.sidebar:
                 st.success("✓ Groq API key detected")
             elif provider == "OpenAI" and api_key.startswith("sk-"):
                 st.success("✓ OpenAI API key detected")
+            elif provider == "Anthropic" and api_key.startswith("sk-ant-"):
+                st.success("✓ Anthropic API key detected")
             else:
                 st.info("✓ API key set")
 

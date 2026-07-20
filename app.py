@@ -9,7 +9,7 @@ import time
 # so the app runs the same locally and on Streamlit Cloud.
 APP_DIR = Path(__file__).parent
 
-from utils.api_handler import MODEL_OPTIONS, DEFAULT_MODEL, estimate_token_cost
+from utils.api_handler import PROVIDERS, DEFAULT_PROVIDER, MODEL_REGISTRIES, get_default_model, estimate_token_cost
 from utils.exporters import export_audit_log_csv, export_pipeline_csv
 from utils.validators import validate_csv, validate_manual_entry
 from agents.segmentation import run_segmentation, get_segmentation_summary
@@ -131,8 +131,9 @@ st.markdown("""
 # ── Session state init ──────────────────────────────────────────────────────
 def init_session():
     defaults = {
-        "model_name": DEFAULT_MODEL,
+        "model_name": get_default_model(DEFAULT_PROVIDER),
         "api_key": "",
+        "provider": DEFAULT_PROVIDER,
         "demo_mode": False,
         "current_step": 1,
         "suppliers": [],
@@ -210,25 +211,36 @@ with st.sidebar:
             exit_demo()
             st.rerun()
     else:
-        api_key = st.text_input("Gemini API Key", type="password",
-                                placeholder="Enter your Google Gemini API key",
+        provider = st.selectbox("AI Provider", PROVIDERS, index=PROVIDERS.index(st.session_state.get("provider", DEFAULT_PROVIDER)))
+        st.session_state.provider = provider
+
+        api_key = st.text_input(f"{provider} API Key", type="password",
+                                placeholder=f"Enter your {provider} API key",
                                 value=st.session_state.get("api_key", ""))
         st.session_state.api_key = api_key
 
         if api_key:
-            if api_key.startswith("AIza") or api_key.startswith("AQ."):
+            if provider == "Google Gemini" and (api_key.startswith("AIza") or api_key.startswith("AQ.")):
                 st.success("✓ Gemini API key detected")
+            elif provider == "Groq" and api_key.startswith("gsk_"):
+                st.success("✓ Groq API key detected")
+            elif provider == "OpenAI" and api_key.startswith("sk-"):
+                st.success("✓ OpenAI API key detected")
             else:
                 st.info("✓ API key set")
 
-            model_ids = list(MODEL_OPTIONS.keys())
-            model_names = list(MODEL_OPTIONS.values())
-            cur_model_idx = model_ids.index(st.session_state.get("model_name")) if st.session_state.get("model_name") in model_ids else 0
+            models_dict = MODEL_REGISTRIES.get(provider, {})
+            model_ids = list(models_dict.keys())
+            model_names = list(models_dict.values())
+            
+            cur_model_id = st.session_state.get("model_name")
+            cur_model_idx = model_ids.index(cur_model_id) if cur_model_id in model_ids else 0
+            
             selected_model_name = st.selectbox("Model", model_names, index=cur_model_idx)
             st.session_state.model_name = model_ids[model_names.index(selected_model_name)]
         else:
-            st.warning("⚠ Gemini API key required")
-            st.session_state.model_name = DEFAULT_MODEL
+            st.warning(f"⚠ {provider} API key required")
+            st.session_state.model_name = get_default_model(provider)
 
     st.markdown("---")
     st.markdown("**Segmentation Thresholds**")
@@ -262,7 +274,7 @@ with st.sidebar:
             st.caption("**Est. API cost:** $0.00 — demo mode makes no API calls")
         else:
             eligible = [s for s in st.session_state.segmented if s.get("tier") in ("B", "C")]
-            est = estimate_token_cost(len(eligible), st.session_state.model_name)
+            est = estimate_token_cost(len(eligible), st.session_state.provider, st.session_state.model_name)
             st.caption(f"**Est. API cost:** {est['cost_str']}\n\n~{est['total_tokens']:,} tokens · {est['suppliers']} suppliers")
 
 
@@ -545,7 +557,7 @@ def render_step3():
         else:
             # Live mode — run agent
             if not st.session_state.api_key:
-                st.error("⚠ Gemini API key required. Enter it in the sidebar — or load the demo from Step 1.")
+                st.error(f"⚠ {st.session_state.provider} API key required. Enter it in the sidebar — or load the demo from Step 1.")
                 return
 
             if st.button("▶ Run Intelligence Agent", type="primary"):
@@ -555,7 +567,7 @@ def render_step3():
 
                 output = run_intelligence_batch(
                     eligible, st.session_state.api_key, progress, status,
-                    model_name=st.session_state.model_name,
+                    provider=st.session_state.provider, model_name=st.session_state.model_name,
                 )
                 st.session_state.intelligence = output["results"]
                 log_action("intelligence_generated", detail=f"{len(output['results'])} briefs · {len(output['failed'])} failed")
@@ -570,7 +582,8 @@ def render_step3():
                             try:
                                 result = run_intelligence_single(f["supplier"],
                                                                  st.session_state.api_key,
-                                                                 st.session_state.model_name)
+                                                                 provider=st.session_state.provider,
+                                                                 model_name=st.session_state.model_name)
                                 st.session_state.intelligence[f["name"]] = result
                                 st.success(f"✓ {f['name']} retried successfully")
                                 st.rerun()
@@ -677,7 +690,7 @@ def render_step3():
 </div>""", unsafe_allow_html=True)
 
             if st.session_state.demo_mode:
-                st.caption("💬 Q&A about briefs requires a live Gemini API key — disabled in demo mode.")
+                st.caption("💬 Q&A about briefs requires a live API key — disabled in demo mode.")
             else:
                 ask_col, btn_col = st.columns([5, 1])
                 with ask_col:
@@ -695,7 +708,8 @@ def render_step3():
                             answer = ask_intel_agent(
                                 s, intel, question,
                                 st.session_state.api_key,
-                                st.session_state.model_name,
+                                provider=st.session_state.provider,
+                                model_name=st.session_state.model_name,
                             )
                         if name not in st.session_state.intel_qa:
                             st.session_state.intel_qa[name] = []
@@ -750,7 +764,7 @@ def render_step4():
                 st.rerun()
         else:
             if not st.session_state.api_key:
-                st.error("⚠ Gemini API key required.")
+                st.error(f"⚠ {st.session_state.provider} API key required.")
                 return
 
             sender_name = st.text_input("Your Name (for message sign-offs) *", value=st.session_state.get('sender_name', ''))
@@ -767,6 +781,7 @@ def render_step4():
                     eligible, st.session_state.intelligence,
                     st.session_state.api_key,
                     progress, status,
+                    provider=st.session_state.provider,
                     model_name=st.session_state.model_name,
                     sender_name=st.session_state.sender_name,
                 )
@@ -842,7 +857,7 @@ def render_step4():
 
                 with tab_regen:
                     if st.session_state.demo_mode:
-                        st.caption("↺ Regeneration requires a live Gemini API key — disabled in demo mode.")
+                        st.caption("↺ Regeneration requires a live API key — disabled in demo mode.")
                     else:
                         reason = st.text_input(
                             "Reason", key=f"regen_{name}",
@@ -854,7 +869,8 @@ def render_step4():
                                 intel = st.session_state.intelligence.get(name, {})
                                 new_msg = regenerate_message(s, intel, reason,
                                                              st.session_state.api_key,
-                                                             st.session_state.model_name,
+                                                             provider=st.session_state.provider,
+                                                             model_name=st.session_state.model_name,
                                                              sender_name=st.session_state.get('sender_name', ''))
                                 st.session_state.messages[name].update(new_msg)
                                 log_action("regenerated", supplier_name=name, detail=f"Reason: {reason}")
@@ -864,7 +880,7 @@ def render_step4():
 
                 with tab_ask:
                     if st.session_state.demo_mode:
-                        st.caption("💬 Q&A about drafts requires a live Gemini API key — disabled in demo mode.")
+                        st.caption("💬 Q&A about drafts requires a live API key — disabled in demo mode.")
                     else:
                         msg_qa_history = st.session_state.msg_qa.get(name, [])
                         for qa in msg_qa_history:
@@ -891,7 +907,8 @@ def render_step4():
                                     answer = ask_intel_agent(
                                         s, intel, msg_question,
                                         st.session_state.api_key,
-                                        st.session_state.model_name,
+                                        provider=st.session_state.provider,
+                                        model_name=st.session_state.model_name,
                                         message=msg,
                                     )
                                 if name not in st.session_state.msg_qa:

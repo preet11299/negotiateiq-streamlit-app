@@ -191,6 +191,7 @@ def run_message_batch(
     api_key: str,
     progress_bar=None,
     status_text=None,
+    provider: str = "Google Gemini",
     model_name: str = None,
     sender_name: str = "",
 ) -> dict:
@@ -217,7 +218,7 @@ def run_message_batch(
                 time.sleep(0.5)
 
             retry_placeholder = st.empty() if st else None
-            raw = call_llm_with_retry(prompt, api_key, retry_placeholder, model_name)
+            raw = call_llm_with_retry(prompt, api_key, retry_placeholder, provider, model_name)
             parsed = parse_message_response(raw)
             results[name] = {
                 **parsed,
@@ -243,12 +244,13 @@ def regenerate_message(
     intelligence: dict,
     reason: str,
     api_key: str,
+    provider: str = "Google Gemini",
     model_name: str = None,
     sender_name: str = "",
 ) -> dict:
     """Regenerate a single message with a user-provided reason."""
     prompt = build_message_prompt(supplier, intelligence, regeneration_reason=reason, sender_name=sender_name)
-    raw = call_llm_with_retry(prompt, api_key, model_name=model_name)
+    raw = call_llm_with_retry(prompt, api_key, provider=provider, model_name=model_name)
     parsed = parse_message_response(raw)
     return {
         **parsed,

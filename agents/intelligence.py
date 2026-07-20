@@ -107,6 +107,7 @@ def run_intelligence_batch(
     api_key: str,
     progress_bar=None,
     status_text=None,
+    provider: str = "Google Gemini",
     model_name: str = None,
 ) -> dict:
     """
@@ -134,7 +135,7 @@ def run_intelligence_batch(
 
             retry_placeholder = st.empty() if st else None
             raw = call_llm_with_retry(prompt, api_key, retry_placeholder,
-                                      model_name, json_mode=True)
+                                      provider, model_name, json_mode=True)
             parsed = parse_intelligence_response(raw, supplier)
             results[name] = {**parsed, "supplier": supplier}
 
@@ -150,10 +151,11 @@ def run_intelligence_batch(
 
 
 def run_intelligence_single(supplier: dict, api_key: str,
+                            provider: str = "Google Gemini",
                             model_name: str = None) -> dict:
     """Run intelligence agent on a single supplier (for retry)."""
     prompt = build_intelligence_prompt(supplier)
-    raw = call_llm_with_retry(prompt, api_key, model_name=model_name, json_mode=True)
+    raw = call_llm_with_retry(prompt, api_key, provider=provider, model_name=model_name, json_mode=True)
     return parse_intelligence_response(raw, supplier)
 
 
@@ -183,6 +185,7 @@ def ask_intel_agent(
     brief: dict,
     question: str,
     api_key: str,
+    provider: str = "Google Gemini",
     model_name: str = None,
     message: dict = None,
 ) -> str:
@@ -213,4 +216,4 @@ def ask_intel_agent(
         message_section=message_section,
         question=question,
     )
-    return call_llm_with_retry(prompt, api_key, model_name=model_name)
+    return call_llm_with_retry(prompt, api_key, provider=provider, model_name=model_name)

@@ -11,22 +11,26 @@ MODEL_REGISTRIES = {
     "Google Gemini": {
         "gemini-3.5-flash": "Gemini 3.5 Flash",
         "gemini-3.1-pro-preview": "Gemini 3.1 Pro Preview",
-        "gemini-3.1-flash-lite": "Gemini 3.1 Flash-Lite",
+        "gemini-2.5-flash-lite-preview": "Gemini 2.5 Flash-Lite Preview",
     },
     "Groq": {
-        "llama-3.1-70b-versatile": "Llama 3.1 (70B)",
+        "llama-3.3-70b-versatile": "Llama 3.3 (70B)",
         "llama-3.1-8b-instant": "Llama 3.1 (8B)",
         "mixtral-8x7b-32768": "Mixtral (8x7B)",
     },
     "OpenAI": {
+        "gpt-5.6-sol": "GPT-5.6 Sol",
+        "gpt-5.6-terra": "GPT-5.6 Terra",
+        "gpt-5.6-luna": "GPT-5.6 Luna",
         "gpt-4o": "GPT-4o",
         "gpt-4o-mini": "GPT-4o Mini",
-        "gpt-3.5-turbo": "GPT-3.5 Turbo",
+        "o4-mini": "o4-mini",
     },
     "Anthropic": {
-        "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet",
-        "claude-3-5-haiku-20241022": "Claude 3.5 Haiku",
-        "claude-3-opus-20240229": "Claude 3 Opus",
+        "claude-fable-5": "Claude Fable 5",
+        "claude-opus-4-8": "Claude Opus 4.8",
+        "claude-sonnet-5": "Claude Sonnet 5",
+        "claude-haiku-4-5": "Claude Haiku 4.5",
     }
 }
 

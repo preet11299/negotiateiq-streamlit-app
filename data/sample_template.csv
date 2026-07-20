@@ -1,0 +1,11 @@
+supplier_name,category,annual_spend_usd,country,contact_name,contact_email,sole_source,current_payment_terms,last_negotiation_date,notes
+Acme Supply Co,MRO,45000,USA,Jane Smith,jane.smith@acme.com,N,Net 30,2023-06-15,Reliable supplier but rates haven't moved in 2 years
+Global Freight Partners,Freight,120000,USA,Marcus Hill,m.hill@globalfreight.com,N,Net 30,2024-01-10,Handles most domestic LTL volume
+Precision Parts GmbH,Electronic Components,310000,Germany,Klaus Bauer,k.bauer@precisionparts.de,Y,Net 60,2022-11-20,Sole certified supplier for custom connectors
+Pacific Packaging Ltd,Packaging,67000,Japan,Yuki Tanaka,y.tanaka@pacpkg.co.jp,N,Net 45,2023-09-01,Secondary packaging vendor
+Metro Office Supplies,Office Supplies,28000,USA,Amy Chen,a.chen@metrooffice.com,N,Net 30,,Never formally negotiated - on catalog pricing
+TechServ Solutions,IT Services,95000,USA,Priya Mehta,p.mehta@techserv.com,N,Net 30,2023-03-15,Managed services contract - renewal due Q4
+BuildCare Facilities,Facilities Management,54000,USA,Tom Castillo,t.castillo@buildcare.com,N,Net 30,2022-08-01,Covers 2 sites - month to month contract
+IndoRaw Materials,Raw Materials,185000,India,Rajesh Kumar,r.kumar@indoraw.in,Y,Net 60,2021-05-10,Sole source for specialty resin - currency risk noted
+FastShip Logistics,Freight,43000,Netherlands,Erik van der Berg,e.vanderberg@fastship.nl,N,Net 45,2023-11-30,EU cross-border only
+SteadyPower Inc,MRO,76000,USA,Brian Walsh,b.walsh@steadypower.com,N,Net 15,2024-02-20,Short payment terms are a cash flow issue

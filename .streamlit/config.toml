@@ -1,0 +1,12 @@
+# The app ships its own dark styling, so pin the base theme to match.
+# Without this, Streamlit Cloud renders light-mode widgets against the
+# app's dark background.
+[theme]
+base = "dark"
+primaryColor = "#2F81F7"
+backgroundColor = "#0D1117"
+secondaryBackgroundColor = "#161B22"
+textColor = "#E6EDF3"
+
+[server]
+headless = true

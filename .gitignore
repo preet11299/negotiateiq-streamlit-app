@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Secrets — never commit API keys
+.env
+.streamlit/secrets.toml
+
+# Claude Code tooling (machine-specific paths)
+.claude/
+
+# macOS
+.DS_Store

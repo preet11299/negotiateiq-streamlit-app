@@ -14,8 +14,8 @@ MODEL_REGISTRIES = {
         "gemini-3.1-flash-lite": "Gemini 3.1 Flash-Lite",
     },
     "Groq": {
-        "llama3-70b-8192": "Llama 3 (70B)",
-        "llama3-8b-8192": "Llama 3 (8B)",
+        "llama-3.1-70b-versatile": "Llama 3.1 (70B)",
+        "llama-3.1-8b-instant": "Llama 3.1 (8B)",
         "mixtral-8x7b-32768": "Mixtral (8x7B)",
     },
     "OpenAI": {
